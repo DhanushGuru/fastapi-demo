@@ -19,10 +19,24 @@ products=[
     product(id=4,name="Watch",description="Know your valuable time",price=100,quantity=30),
     ]
 
-@app.get("/products")
+def init_db():
+    db= session() 
+
+    count = db.query(database_models.Product).count      
+   
+    # If Product table is empty, insert initial default products
+    # Prevents duplicate data on every app restart
+    
+    if count == 0:
+        for product in products:
+            db.add(database_models.Product(**product.model_dump())) #**->unpacking(and this will give you key,value pait),model_dump() give you a dict form object
+    
+        db.commit()
+init_db() 
+
+@app.get("/products") 
 def all_products():
-    db = session()
-    db.query()
+ 
     return products 
 
 @app.get("/product/{id}")
