@@ -1,8 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI,Depends
 from models import product
 from database import session,engine
-import database_models;
-
+import database_models
+from sqlalchemy.orm import Session
 
 app = FastAPI()
 
@@ -18,6 +18,14 @@ products=[
     product(id=3,name="Pencil",description="Sharp pencil",price=19,quantity=39),
     product(id=4,name="Watch",description="Know your valuable time",price=100,quantity=30),
     ]
+
+def get_db():
+    db = session()
+    try:
+        yield db    #yield="Pause here. After work is finished, continue and clean up.""Take this db for now… I will wait… after you're done, I will close it."
+    finally:
+        db.close()
+
 
 def init_db():
     db= session() 
@@ -35,16 +43,16 @@ def init_db():
 init_db() 
 
 @app.get("/products") 
-def all_products():
- 
-    return products 
+def all_products(db:Session=Depends(get_db)):
+    db_products = db.query(database_models.Product).all()
+    return db_products
 
 @app.get("/product/{id}")
-def get_product_by_id(id:int):
-    for product in products:
-        if product.id == id:
-            return product
-    return "Invalid ID"
+def get_product_by_id(id:int,db:Session=Depends(get_db)):
+        db_product = db.query(database_models.Product).filter(database_models.Product.id == id).first()
+        if db_product:
+            return db_product
+        return "Invalid ID"
 
 @app.post("/product")
 def add_product(product: product):
