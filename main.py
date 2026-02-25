@@ -1,10 +1,16 @@
 from fastapi import FastAPI,Depends
+from fastapi.middleware.cors import CORSMiddleware
 from models import product
 from database import session,engine
 import database_models
 from sqlalchemy.orm import Session
 
 app = FastAPI()
+
+app.add_middleware(
+     CORSMiddleware,
+     allow_origins=["http://localhost:3000"]
+)
 
 database_models.Base.metadata.create_all(bind=engine)
 
@@ -47,20 +53,20 @@ def all_products(db:Session=Depends(get_db)):
     db_products = db.query(database_models.Product).all()
     return db_products
 
-@app.get("/product/{id}")
+@app.get("/products/{id}")
 def get_product_by_id(id:int,db:Session=Depends(get_db)):
         db_product = db.query(database_models.Product).filter(database_models.Product.id == id).first()
         if db_product:
             return db_product
         return "Invalid ID"
 
-@app.post("/product")
+@app.post("/products")
 def add_product(product: product, db:Session=Depends(get_db)):
     db.add(database_models.Product(**product.model_dump()))
     db.commit()
     return product
 
-@app.put("/product")
+@app.put("/products")
 def update_product(id:int,product:product, db:Session = Depends(get_db)):
         db_product = db.query(database_models.Product).filter(database_models.Product.id == id).first() 
         if db_product:
@@ -75,13 +81,15 @@ def update_product(id:int,product:product, db:Session = Depends(get_db)):
 
 
 
-@app.delete("/product")
-def delete_product(id: int):
-    for i in range(len(products)):
-         if products[i].id == id:
-             del products[i]
+@app.delete("/products")
+def delete_product(id: int, db:Session=Depends(get_db)):
+        db_product = db.query(database_models.Product).filter(database_models.Product.id == id).first() 
+        if db_product:
+             db.delete(db_product)
+             db.commit()
              return "ID deleted"
-    return "Invalid ID"
+        else:
+            return "Invalid ID"
    
 
 
