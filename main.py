@@ -8,8 +8,11 @@ from sqlalchemy.orm import Session
 app = FastAPI()
 
 app.add_middleware(
-     CORSMiddleware,
-     allow_origins=["http://localhost:3000"]
+    CORSMiddleware,
+    allow_origins=["*"],  # For development only
+    # allow_credentials=True,
+    allow_methods=["*"],
+    # allow_headers=["*"],
 )
 
 database_models.Base.metadata.create_all(bind=engine)
@@ -66,7 +69,7 @@ def add_product(product: product, db:Session=Depends(get_db)):
     db.commit()
     return product
 
-@app.put("/products")
+@app.put("/products/{id}")
 def update_product(id:int,product:product, db:Session = Depends(get_db)):
         db_product = db.query(database_models.Product).filter(database_models.Product.id == id).first() 
         if db_product:
@@ -81,7 +84,7 @@ def update_product(id:int,product:product, db:Session = Depends(get_db)):
 
 
 
-@app.delete("/products")
+@app.delete("/products/{id}")
 def delete_product(id: int, db:Session=Depends(get_db)):
         db_product = db.query(database_models.Product).filter(database_models.Product.id == id).first() 
         if db_product:

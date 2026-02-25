@@ -4,7 +4,8 @@ import "./App.css";
 import TaglineSection from "./TaglineSection";
 
 const api = axios.create({
-  baseURL: "http://localhost:8000",
+  // If you want full url:    baseURL: "https://your-codespace-name-8000.app.github.dev"
+  baseURL: "",
 });
 
 function App() {
