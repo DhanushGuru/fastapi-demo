@@ -55,17 +55,23 @@ def get_product_by_id(id:int,db:Session=Depends(get_db)):
         return "Invalid ID"
 
 @app.post("/product")
-def add_product(product: product):
-    products.append(product)
+def add_product(product: product, db:Session=Depends(get_db)):
+    db.add(database_models.Product(**product.model_dump()))
+    db.commit()
     return product
 
 @app.put("/product")
-def update_product(id:int,product:product):
-    for i in range(len(products)):
-        if products[i].id == id:
-            products[i] = product
-            return "product added successfully"
-        return "invalid ID"
+def update_product(id:int,product:product, db:Session = Depends(get_db)):
+        db_product = db.query(database_models.Product).filter(database_models.Product.id == id).first() 
+        if db_product:
+             db_product.name = product.name
+             db_product.description = product.description
+             db_product.price = product.price
+             db_product.quantity = product.quantity
+             db.commit() 
+             return "Updated Successfully"
+        else:
+            return "invalid ID"
 
 
 
