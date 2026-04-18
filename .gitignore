@@ -28,6 +28,7 @@ myenv/
 venv/
 env/
 ENV/
+.venv/
 
 # Node.js
 node_modules/
@@ -45,6 +46,7 @@ yarn-error.log*
 # OS
 .DS_Store
 Thumbs.db
+fastapi.db
 
 # Logs
 *.log
